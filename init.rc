@@ -466,6 +466,9 @@ service servicemanager /system/bin/servicemanager
     onrestart restart media
     onrestart restart surfaceflinger
     onrestart restart drm
+# LGE_BROADCAST_JONESEG {
+    onrestart restart broadcast
+# LGE_BROADCAST_JONESEG }
 
 service vold /system/bin/vold
     class core
@@ -522,6 +525,12 @@ service media /system/bin/mediaserver
     group audio camera inet net_bt net_bt_admin net_bw_acct drmrpc mediadrm media_rw divxdrm lgt_gid sdcard_r qcom_diag
 #CAPP_DRM_END
     ioprio rt 4
+# LGE_BROADCAST_JONESEG {
+    onrestart restart broadcast
+# LGE_BROADCAST_JONESEG }
+#[WX] cpp recovery by soojong.jin
+on property:sys.camera.restart=1
+    restart media
 
 service bootanim /system/bin/bootanimation
     class main

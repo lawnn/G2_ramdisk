@@ -1,90 +1,226 @@
 ## Be careful to use "exec" command.
 ## If you execute a non-existing file, an additional init process can be created!
+# LGE_CHANGE_S, 20130307, LGE-FeliCa@lge.com
+on post-fs-data
+    chmod 0775 /felica
+    chown system system /felica
+    mkdir /felica/knife 0771 system system
+# LGE_CHANGE_S, 20130307, LGE-FeliCa@lge.com
+# LGE_CHANGE_S, 20130325, G2-FS@lge.com
+    chmod 0771 /OneSeg
+    chown system system /OneSeg
 
-on boot
-## 2013-08-09 sungwoo79.park@lge.com LGP_DATA_TCPIP_TCP_BUFSIZE_NATIVE [START]
-# ReadMin, ReadInitial, ReadMax, WriteMin, WriteInitial, WriteMax
-    setprop net.tcp.buffersize.default 4096,87380,110208,4096,16384,110208
-    setprop net.tcp.buffersize.edge    4093,26280,704512,4096,16384,110208
-    setprop net.tcp.buffersize.gprs    4092,8760,704512,4096,8760,110208
-    setprop net.tcp.buffersize.umts    4094,87380,110208,4096,16384,110208
-    setprop net.tcp.buffersize.hsdpa   4094,87380,1220608,4096,16384,1220608
-    setprop net.tcp.buffersize.hsupa   4094,87380,1220608,4096,16384,1220608
-    setprop net.tcp.buffersize.hspa    4094,87380,1220608,4096,16384,1220608
-    setprop net.tcp.buffersize.lte     524288,1048576,2097152,262144,524288,1048576
-    setprop net.tcp.buffersize.wifi    524288,1048576,2097152,262144,524288,1048576
-## 2013-08-09 sungwoo79.park@lge.com LGP_DATA_TCPIP_TCP_BUFSIZE_NATIVE [END]
+    chmod 0771 /seclog
+    chown system system /seclog
+# LGE_CHANGE_E, 20130325, G2-FS@lge.com
 
-# LGE_CHANGE_S, [yeonjun.kim@lge.com][2013-06-14] set default brightness
-    write /sys/class/leds/lcd-backlight/brightness 173
+#LGE_CHANGE_S 2013.3.21 jaeho.cho@lge.com add change ownership and mode for diag_enable
+    chown system system /sys/devices/platform/lg_diag_cmd/diag_enable
+    chmod 0660 /sys/devices/platform/lg_diag_cmd/diag_enable
+#LGE_CHANGE_E 2013.3.21 jaeho.cho@lge.com add change ownership and mode for diag_enable
 
-# Bluetooth tethering
-    setprop bluetooth.pan true
-    setprop persist.service.bt.support.sap true
-    setprop service.bt.support.busytone true
+# LGE_CHANGE_S, 20130411, alan.park@lge.com, TOMOYO Linux log directory
+# create ccs
+    mkdir /seclog/ccs 0755 root root
+    mkdir /seclog/ccs/audit 0755 root root
+# LGE_CHANGE_E, 20130411, alan.park@lge.com, TOMOYO Linux log directory
 
-#2013-07-12 hwayoung.lim@lge.com LGP_DATA_TCPIP_NSRM [START]
-    mkdir /data/connectivity 0775 system system
-    mkdir /data/connectivity/nsrm 0775 system system
-    copy /system/etc/cne/NsrmConfiguration.xml /data/connectivity/nsrm/NsrmConfiguration.xml
-    chown system system /data/connectivity/nsrm/NsrmConfiguration.xml
-    chmod 775 /data/connectivity/nsrm/NsrmConfiguration.xml
-#2013-07-12 hwayoung.lim@lge.com LGP_DATA_TCPIP_NSRM [END]
+# [NFC_PORTING_FOR_DCM_KDDI][S]
+    mkdir /felica/cflock 0771 nfclock nfclock
 
+    chown nfclock nfclock /felica/cflock/cfl_lock
+    chown nfclock nfclock /felica/cflock/cfl_passwd
+    chown nfclock nfclock /felica/cflock/cfl_remote
+    chown nfclock nfclock /felica/cflock/cfl_mdn
+    chown nfclock nfclock /felica/cflock/cfl_mdm
+    chown nfclock nfclock /felica/cflock/cfl_3lm
+# [NFC_PORTING_FOR_DCM_KDDI][E]
 
-# Assign TCP buffer thresholds to be ceiling value of technology maximums
-# Increased technology maximums should be reflected here.
-    write /proc/sys/net/core/rmem_max  3461120
-    write /proc/sys/net/core/wmem_max  3461120
+# LGE_CHANGE_S, 20130723, [STB] daehwan.kim@lge.com, create persist-lg/stblvd
+#    mkdir /persist-lg/stblvd 0771 system system
+     mkdir /persist-lg/stblvd 0770 stb stb
+     chown stb stb /persist-lg/stblvd/dkp
+     chmod 770 /persist-lg/stblvd/dkp
+     chown stb stb /persist-lg/stblvd/srmp
+     chmod 770 /persist-lg/stblvd/srmp
+# LGE_CHANGE_E, 20130723, [STB] daehwan.kim@lge.com, create persist-lg/stblvd
 
-# LGE_CHANGE_E, [LGE_DATA] http://dev.lge.com/wiki/datacop/
+#LGE_CHANGE_S, [NFC][sungwook.ahn@lge.com], 2013-02-20, NFC Bring up
+symlink /dev/ttyHSL2 /dev/snfc_uart
+#symlink /dev/i2c-0 /dev/snfc_i2c
+#LGE_CHANGE_E, [NFC][sungwook.ahn@lge.com], 2013-02-20, NFC Bring up
 
-# 2013.04.26 [red.kim@lge.com] LGIMS ipsec solution [START]
-service ipsecclient /system/bin/ipsecclient
-    class main
-    group system net_admin net_raw
-    disabled
-
-service ipsecstarter /system/bin/ipsecstarter
-    class main
-    user system
-    group system net_admin net_raw
-# 2013.04.26 [red.kim@lge.com] LGIMS ipsec solution [END]
-
-service preloadcopy /system/bin/sh /preload_sl.sh
-    class main
-    user root
-    group media_rw system sdcard_rw
+# LGE_CHANGE_S, [LGE_MODEL][CAPP_POSTINSTALL_MODIFIED], jasper.kim@lge.com, 2013-03-18
+service postinstaller /system/vendor/bin/postinstaller.sh
     disabled
     oneshot
 
-on property:ro.build.type=userdebug
-    setprop sys.coredump 1
+on property:vold.post_fs_data_done=1
+    start postinstaller
+# LGE_CHANGE_E, [LGE_MODEL][CAPP_POSTINSTALL_MODIFIED], jasper.kim@lge.com, 2013-03-18
 
-on post-fs
-#// LGE_UPDATE_S DMS_SYSTEM_GOTA dms-fota@lge.com 2012/11/09
-    start flash_recovery
-#// LGE_UPDATE_E DMS_SYSTEM_GOTA dms-fota@lge.com 2012/11/09
-
-on post-fs-data
-# LGE_CHANGE_S, 20130507 G2-FS@lge.com, factory reset magic code
-on property:sys.factory=1
-    exec /system/bin/dd if=/system/etc/factory_reset_magic of=/dev/block/platform/msm_sdcc.1/by-name/pad1 bs=512 count=1
-# LGE_CHANGE_E, 20120507 G2-FS@lge.com, factory reset magic code
-
-on property:persist.sys.emmc_size=0
-    start preloadcopy
+# LGE_CHANGE_S, for blocking external output of 1-seg
+on property:sys.hdmi.block=block    
+	write /sys/bus/i2c/drivers/anx7808/0-0072/hdcp_switch 1
+on property:sys.hdmi.block=unblock    
+	write /sys/bus/i2c/drivers/anx7808/0-0072/hdcp_switch 0
+# LGE_CHANGE_E	
 
 on fs
-    mkdir /cust 0771 system system
-    wait /dev/block/platform/msm_sdcc.1/by-name/cust
-    exec /system/bin/e2fsck -p /dev/block/platform/msm_sdcc.1/by-name/cust
-    mount ext4 /dev/block/platform/msm_sdcc.1/by-name/cust /cust ro nosuid nodev barrier=1 noauto_da_alloc
+    # LGE_UPDATE_START, 2013/03/13, G2-FS@lge.com
+    mkdir /felica 0775 system system
+    mkdir /OneSeg 0771 system system
+    mkdir /seclog 0771 system system
+
+    wait /dev/block/platform/msm_sdcc.1/by-name/felica
+    exec /system/bin/e2fsck -p /dev/block/platform/msm_sdcc.1/by-name/felica
+    mount ext4 /dev/block/platform/msm_sdcc.1/by-name/felica /felica nosuid nodev barrier=1 noauto_da_alloc
+
+    wait /dev/block/platform/msm_sdcc.1/by-name/OneSeg
+    exec /system/bin/e2fsck -p /dev/block/platform/msm_sdcc.1/by-name/OneSeg
+    mount ext4 /dev/block/platform/msm_sdcc.1/by-name/OneSeg /OneSeg nodev nosuid barrier=1 noauto_da_alloc
+
+    wait /dev/block/platform/msm_sdcc.1/by-name/seclog
+    exec /system/bin/e2fsck -p /dev/block/platform/msm_sdcc.1/by-name/seclog
+    mount ext4 /dev/block/platform/msm_sdcc.1/by-name/seclog /seclog nodev nosuid barrier=1 noauto_da_alloc
+   # LGE_UPDATE_END
+
+# LGE_CHANGE_S, 20130410, jinmo.koo@lge.com, enabling remotelock as dev-admin
+    mkdir /data/system 0775 system system
+# LGE_CHANGE_E, 20130410, jinmo.koo@lge.com, enabling remotelock as dev-admin
 
 on init
+    # LGE_UPDATE_START, 2013/03/13, G2-FS@lge.com
     exec /sbin/setup_fs_static \
-        /dev/block/platform/msm_sdcc.1/by-name/cust \
+        /dev/block/platform/msm_sdcc.1/by-name/felica \
+        /dev/block/platform/msm_sdcc.1/by-name/OneSeg \
+        /dev/block/platform/msm_sdcc.1/by-name/seclog \
         no_reboot
+    # LGE_UPDATE_END
+
+    # LGE_CHANGE_S, G2-FS@lge.com, 2013-03-23, export external sdcard
+    mkdir /storage/external_SD 0700 root root
+    mkdir /mnt/media_rw 0700 media_rw media_rw
+    mkdir /mnt/media_rw/external_SD 0700 media_rw media_rw
+    export EXTERNAL_ADD_STORAGE /storage/external_SD
+    export SECONDARY_STORAGE /storage/external_SD
+    # LGE_CHANGE_E, G2-FS@lge.com, 2013-03-23, export external sdcard
+
+
+# 2013-04-08, SangYeol-Byeon(sangyeol.byeon@lge.com), VirusScanDeamon [Start]
+service mfescand /system/bin/mfescand
+    class main
+    socket mfescand stream 600 system system
+# 2013-04-08, SangYeol-Byeon(sangyeol.byeon@lge.com), VirusScanDeamon [End]
+
+# 3LM_MDM_START -- 3lm mdm properties are added
+on property:ro.build.type=eng
+    # 3LM settings
+    setprop ro.3lm.production 1
+    setprop ro.3lm.build.lg true
+    setprop ro.3LM.extended 1
+    setprop ro.camera.sound.forced 1
+    setprop ro.3LM.oem_manifest 3
+#    setprop ro.3LM.address c2.z.3lm.com
+    setprop ro.3lm.build.lge true
+    # 3LM encryption
+    setprop ro.3lm.legacy_encryption 0
+
+on property:ro.build.type=userdebug
+    # 3LM settings
+    setprop ro.3lm.production 1
+    setprop ro.3LM.extended 1
+    setprop ro.camera.sound.forced 1
+    setprop ro.3LM.oem_manifest 3
+#    setprop ro.3LM.address c2.z.3lm.com
+    # 3LM encryption
+    setprop ro.3lm.legacy_encryption 0
+
+on property:ro.build.type=user
+    # 3LM settings
+    setprop ro.3lm.production 1
+    setprop ro.3LM.extended 1
+    setprop ro.camera.sound.forced 1
+    setprop ro.3LM.oem_manifest 3
+#    setprop ro.3LM.address c2.z.3lm.com
+    # 3LM encryption
+    setprop ro.3lm.legacy_encryption 0
+# 3LM_MDM_END
+
+on boot
+#LGE_CHANGE_S, wooje.shim@lge.com 2012-09-07 for performance
+# Define TCP buffer sizes for various networks
+#   ReadMin, ReadInitial, ReadMax, WriteMin, WriteInitial, WriteMax,
+	setprop net.tcp.buffersize.default		8096,87380,110208,4096,16384,110208
+	setprop net.tcp.buffersize.lte			4096,1048576,2097152,262200,524288,1048576
+	setprop net.tcp.buffersize.umts			8096,140625,3461120,4096,140625,3461120
+	setprop net.tcp.buffersize.hspa			8096,140625,3461120,4096,140625,3461120
+	setprop net.tcp.buffersize.edge			4093,26280,35040,4096,16384,35040
+	setprop net.tcp.buffersize.gprs			4092,8760,11680,4096,8760,11680
+	setprop net.tcp.buffersize.evdo			4096,64860,121072,23460,32768,64860
+	setprop net.tcp.buffersize.evdo_b  		4096,262144,524288,65536,131072,262144
+	setprop net.tcp.buffersize.ehrpd  		4096,262144,524288,65536,131072,262144
+	setprop net.tcp.buffersize.wifi         524288,1048800,1048800,262144,524288,1048576
+#LGE_CHANGE_E, wooje.shim@lge.com 2012-09-07 for performance
+
+#LGE_CHANGE_S - sehwan09.park - set property for mdp downscaling - for wfd problem on resolution of "< 1080p"
+	setprop sys.hwc.mdp_downscale_enabled	1
+#LGE_CHANGE_E - sehwan09.park
+
+# LGE_CHANGE_S, [LGE_DATA][CNE_NSRM], ct-radio@lge.com, 2012-04-05
+setprop lg.data.nsrm.policypath		/data/connectivity/nsrm/NsrmConfiguration.xml 
+cp /system/etc/cne/NsrmConfiguration.xml /data/connectivity/nsrm/
+chown system.system /data/connectivity/nsrm/NsrmConfiguration.xml
+chmod 775 /data/connectivity/nsrm/NsrmConfiguration.xml
+setprop persist.cne.nsrm.bkg.evt	16255
+chmod 0644 /persist/init.cne.rc
+    mkdir /data/connectivity 0775 system system
+    mkdir /data/connectivity/nsrm 0775 system system
+    copy /system/etc/cne/libcnelog.so /data/connectivity/libcnelog.so
+# LGE_CHANGE_E, [LGE_DATA][CNE_NSRM], ct-radio@lge.com, 2012-04-05 
+
+# LGE_CHANGE_S, [2014-02-25] set default brightness to 50%
+    write /sys/class/leds/lcd-backlight/brightness 153
+
+#LGE_CHANGE_S, 20130521 bg80.song@lge.com change permission for IrDA
+	chown system system /dev/ttyHSL3
+	chmod 660 /dev/ttyHSL3
+#LGE_CHANGE_E, 20130521 bg80.song@lge.com change permission for IrDA
+
+# LGE_CHANGE_S, 20130410, jinmo.koo@lge.com, enabling remotelock as dev-admin
+service init_devadmin /system/bin/sh /system/vendor/bin/init_devadmin.sh
+    class main
+    user system
+    group system
+    oneshot
+# LGE_CHANGE_E, 20130410, jinmo.koo@lge.com, enabling remotelock as dev-admin
+
+# LGE_BROADCAST_JONESEG_{
+service broadcast /system/bin/libbroadcast_server
+    class main
+    user media
+    group system audio media graphics sdcard_rw
+# LGE_BROADCAST_JONESEG_}
+
+# Bluetooth tethering
+on boot
+    setprop bluetooth.pan true
+    setprop persist.service.bt.support.map false
+	
+# LGE_CHANGE_S, 20130411, alan.park@lge.com, TOMOYO Linux log daemon starting
+service ccs-auditd /system/bin/ccs-auditd
+    class core
+    oneshot
+# LGE_CHANGE_E, 20120411, alan.park@lge.com, TOMOYO Linux log daemon starting
+
+# LGE_CHANGE_S, 20131115, shawn.park@lge.com, sony nfc init [START]
+# Sony nfc init
+on fs
+    exec /sbin/nfcinit none
+
+on chargerlogo
+    exec /sbin/nfcinit charger_logo_set
+# LGE_CHANGE_S, 20131115, shawn.park@lge.com, sony nfc init [END]
 
 #2013.05.30 LGE_CHANGE_S kijae.park@lge.com, SMPL count
 service smpl_count /system/bin/smpl_count
@@ -92,3 +228,65 @@ service smpl_count /system/bin/smpl_count
 	user root
 	oneshot
 #2013.05.30 LGE_CHANGE_E kijae.park@lge.com, SMPL count
+
+# LGE_CHANGE_S, [UICC][KDDI] changoh.kim Add uimmdl_server service
+service uimmdl_server /system/bin/uimmdl_server /dev/ttyGS0 /dev/hsic0
+    class late_start
+    user system
+    group radio
+    socket uimmdl_server stream 0660 radio system
+# LGE_CHANGE_E, [UICC][KDDI] changoh.kim Add uimmdl_server service
+
+# LGE_CHANGE_S, 20120704, bg80.song@lge.com Add Sysfs Permission Change Routine for AAT IrDA Test
+on property:sys.irdatest.enable=true
+    chmod 666 /dev/ttyHSL3
+
+on property:sys.irdatest.enable=false
+    chmod 660 /dev/ttyHSL3
+# LGE_CHANGE_E, 20120704, bg80.song@lge.com Add Sysfs Permission Change Routine for AAT IrDA Test
+
+# 2013.07.16 [jisun.jung@lge.com] LGIMS ipsec solution [START]
+service ipsecclient /system/bin/ipsecclient
+  class main
+  group system net_admin net_raw
+  disabled
+
+service ipsecstarter /system/bin/ipsecstarter
+  class main
+  user system
+  group system net_admin net_raw
+# 2013.07.16 [jisun.jung@lge.com] LGIMS ipsec solution [END]
+
+# LGE_CHANGE_S, 20130723, jeseung.yoo@lge.com, TTL check(STB) log daemon starting
+service ddtcps /system/bin/ddtcps
+    user root
+    group root
+
+on property:sys.boot_completed=1    
+    start ddtcps
+# LGE_CHANGE_E, 20130723, jeseung.yoo@lge.com, TTL check(STB)log daemon starting
+
+#LGE_CHANGE_S, 20130821 bg80.song@lge.com Charger AICL Porting
+service charger_monitor /system/bin/charger_monitor
+    user system
+    group system
+
+on charger-monitor
+    chown root system /sys/module/qpnp_charger/parameters/charger_monitor
+    chown root system /sys/module/qpnp_charger/parameters/usb_in_uv
+    chown root system /sys/module/qpnp_charger/parameters/vchg_uv
+    chown root system /sys/class/power_supply/battery/input_current_max
+    chown root system /sys/class/power_supply/battery/input_current_settled
+    chown root system /sys/class/power_supply/battery/voltage_min
+    chmod 0664 /sys/class/power_supply/battery/input_current_max
+    chmod 0664 /sys/class/power_supply/battery/input_current_settled
+    chmod 0664 /sys/class/power_supply/battery/voltage_min
+    chmod 0664 /sys/module/qpnp_charger/parameters/charger_monitor
+    start charger_monitor
+#LGE_CHANGE_E, 20130821 bg80.song@lge.com Charger AICL Porting
+# LGE_CHANGE_S, G2-FS@lge.com, 2013-10-30, fuse for external_SD
+service fuse_external_SD /system/bin/sdcard -u 1023 -g 1023 -w 1023 -d /mnt/media_rw/external_SD /storage/external_SD
+    class late_start
+    disabled
+# LGE_CHANGE_E, G2-FS@lge.com, 2013-10-30, fuse for external_SD
+

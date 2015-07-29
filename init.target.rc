@@ -271,36 +271,18 @@ on property:init.svc.bootanim=stopped
     start usf-post-boot
     start write_event_log
 
-service imsqmidaemon /system/bin/imsqmidaemon
-    class main
-    user system
-    group radio net_raw log qcom_diag
-    disabled
-
-# imsdatadaemon starts with root and UID will be downgraded to SYSTEM.
-service imsdatadaemon /system/bin/imsdatadaemon
-    class main
-    user root
-    group system wifi radio net_raw log qcom_diag net_admin
-    disabled
-
 service wcnss-service /system/bin/wcnss_service
     class late_start
     user root
     group system wifi
     oneshot
 
-on property:sys.ims.QMI_DAEMON_STATUS=1
-    start imsdatadaemon
-
-service ims_rtp_daemon /system/bin/ims_rtp_daemon
-    class main
-    user system
-    group radio net_raw diag qcom_diag log
-    disabled
-
-on property:sys.ims.DATA_DAEMON_STATUS=1
-    start ims_rtp_daemon
+# LGE_CHANGE_START,jaebum.lee@lge.com 2014.01.07 remove daemones for QCT's Ims
+#service imsqmidaemon /system/bin/imsqmidaemon
+#    class main
+#    user system
+#    group radio net_raw log qcom_diag
+#    disabled
 
 service ppd /system/bin/mm-pp-daemon
     class late_start
@@ -310,3 +292,23 @@ service ppd /system/bin/mm-pp-daemon
 
 on property:init.svc.surfaceflinger=stopped
     stop ppd
+
+# imsdatadaemon starts with root and UID will be downgraded to SYSTEM.
+#service imsdatadaemon /system/bin/imsdatadaemon
+#    class main
+#    user root
+#    group system wifi radio net_raw log qcom_diag net_admin
+#    disabled
+
+#on property:sys.ims.QMI_DAEMON_STATUS=1
+#    start imsdatadaemon
+
+#service ims_rtp_daemon /system/bin/ims_rtp_daemon
+#    class main
+#    user system
+#    group radio net_raw diag qcom_diag log
+#    disabled
+
+#on property:sys.ims.DATA_DAEMON_STATUS=1
+#    start ims_rtp_daemon
+# LGE_CHANGE_END,jaebum.lee@lge.com 2014.01.07 remove daemones for QCT's Ims

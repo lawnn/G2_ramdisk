@@ -12,3 +12,11 @@ user=_isolated domain=isolated_app
 user=shell domain=shell type=shell_data_file
 user=lg_fota domain=system_app type=system_data_file
 name=com.lge.allautotest domain=system_app type=system_data_file
+user=mfc domain=mfc type=felica_data_file
+user=mfm domain=mfm type=felica_data_file
+user=mfs domain=mfs type=felica_data_file
+user=mfw domain=mfw type=felica_data_file
+user=nfclock domain=nfclock type=felica_data_file
+user=stb name=com.digion.dixim.android.requestplayer.lge domain=system_app type=system_data_file
+user=stb name=com.digion.dixim.android.player.lge domain=system_app type=system_data_file
+user=stb name=com.digion.dixim.android.secureplayer.lge domain=system_app type=system_data_file

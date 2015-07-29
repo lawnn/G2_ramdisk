@@ -157,12 +157,5 @@ service recovery_write /sbin/write_recovery
     oneshot
 #// LGE_UPDATE_S DMS_SYSTEM_GOTA dms-fota@lge.com 2012/11/09
 
-#//RCT
-service rctd /system/bin/rctd
-    class late_start
-    user root
-    group root
-#
-
 on property:sys.boot_completed=1
 	write sys/class/graphics/fb0/noti_boot 1
